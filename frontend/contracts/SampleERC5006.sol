@@ -8,7 +8,7 @@ import "./ERC5006.sol";
 //  ---Missing
 //  transfer service fee, rent fee
 //  Utility functions view Functions
-
+//updated
 contract SampleERC5006 is ERC5006, Ownable {
     
     struct TokenRecord{
