@@ -12,9 +12,11 @@ export default function Navbar() {
           </button>
           <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div className="navbar-nav">
-              <Link className="nav-link" aria-current="page" to="/createNft">Create NFT</Link>
-              <Link className="nav-link" to="/viewMyNft">View My NFT</Link>
-              <Link className="nav-link" to="/purchases">Purchases</Link>
+              <Link className="nav-link" aria-current="page" to="/mintNft">Mint</Link>
+              <Link className="nav-link" to="/markForRent">Mark For Rent</Link>
+              <Link className="nav-link" to="/viewMarkedRecord">View Marked Records</Link>
+              <Link className="nav-link" to="/viewOnRentRecord">View OnRent Records</Link>
+              <Link className="nav-link" to="/viewBorrowedRecord">View Borrowed Records</Link>
               <Link className="nav-link" to="/marketplace">Marketplace</Link>
             </div>
           </div>

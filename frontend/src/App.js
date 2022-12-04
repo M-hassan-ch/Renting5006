@@ -5,6 +5,7 @@ import ViewMyNft from './Components/ViewMyNft';
 import MarkForRent from './Components/MarkForRent';
 import MarkedRecord from './Components/MarkedRecord';
 import BorrowedRecord from './Components/BorrowedRecord';
+import OnRentRecord from './Components/OnRentRecord';
 import Purchases from './Components/Purchases'
 import './App.css';
 import React from 'react';
@@ -18,42 +19,56 @@ import {
 function App() {
   return (
     <>
-      {/* <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<React.Fragment>
-            <CreateNft />
-          </React.Fragment>}>
-          </Route>
-
-          <Route path="/createNft" element={<React.Fragment>
-            <CreateNft />
-          </React.Fragment>}>
-          </Route>
-
-          <Route path="/purchases" element={<React.Fragment>
-            <Purchases />
-          </React.Fragment>}>
-          </Route>
-
-          <Route path="/marketplace" element={<React.Fragment>
-            <Marketplace />
-          </React.Fragment>}>
-          </Route>
-
-          <Route path="/viewMyNft" element={<React.Fragment>
-            <ViewMyNft />
-          </React.Fragment>}>
-          </Route>
-
-        </Routes>
-      </BrowserRouter> */}
       <ContractState>
-        <CreateNft />
-        <ViewMyNft />
-        <MarkForRent></MarkForRent>
-        <MarkedRecord></MarkedRecord>
+        <BrowserRouter>
+
+          <Navbar />
+
+          <Routes>
+            <Route path="/" element={<React.Fragment>
+              <CreateNft />
+            </React.Fragment>}>
+            </Route>
+
+            <Route path="/mintNft" element={<React.Fragment>
+              <CreateNft />
+            </React.Fragment>}>
+            </Route>
+
+            <Route path="/markForRent" element={<React.Fragment>
+              <MarkForRent/>
+            </React.Fragment>}>
+            </Route>
+
+            <Route path="/viewMarkedRecord" element={<React.Fragment>
+              <MarkedRecord></MarkedRecord>
+            </React.Fragment>}>
+            </Route>
+
+            <Route path="/viewOnRentRecord" element={<React.Fragment>
+              <OnRentRecord />
+            </React.Fragment>}>
+            </Route>
+
+            <Route path="/marketplace" element={<React.Fragment>
+              <Marketplace />
+            </React.Fragment>}>
+            </Route>
+
+            <Route path="/viewBorrowedRecord" element={<React.Fragment>
+              <BorrowedRecord></BorrowedRecord>
+            </React.Fragment>}>
+            </Route>
+
+          </Routes>
+        </BrowserRouter>
+
+
+        {/* <MarkedRecord></MarkedRecord>
         <BorrowedRecord></BorrowedRecord>
+        <MarkForRent></MarkForRent>
+        <CreateNft />
+        <ViewMyNft /> */}
       </ContractState>
     </>
   );

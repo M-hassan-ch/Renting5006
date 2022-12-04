@@ -76,8 +76,117 @@ let ContractState = (props) => {
         'mint': minToken,
         'markForRent': markForRent,
         'getMarkedRecords': getMarkedRecords,
+        'removeRecord': removeMarkedRecord,
+        'getBorrowedRecords': getBorrowedRecord,
+        'getOnRentRecords': getOnRentRecords,
+        'validateRecords': validateRecords,
+        'getAllMarkedRecords': getAllMarkedRecords,
+        'borrowToken': borrowToken,
         // 'getTxCount': getTxCount,
         // 'getAllTx': getAllTx
+    }
+
+    async function borrowToken(recId, price) {
+        //validbalance
+        try {
+            const _signer = await Provider.provider.getSigner();
+            let balance = (Number(await _signer.getBalance()));
+            if (balance >= price) {
+                let _contract = await contract.connect(Provider.signer);
+                const options = { value: price };
+                const tx = await _contract.borrowToken(recId, options);
+
+                await tx.wait() ? console.log("Successfully buyed record") : console.log("Error buying record");
+            }
+            else {
+                throw ('Insufficient balance.')
+            }
+        } catch (error) {
+            console.log('error while buying record');
+            console.log(error);
+        }
+    }
+
+    async function getBorrowedRecord() {
+        try {
+            let _contract = await contract.connect(Provider.signer);
+            let recIds = await _contract.getBorrowedRecordId();
+            let records = [];
+
+            for (let i = 0; i < recIds.length; i++) {
+                let record = await _contract._tokenRecords(Number(recIds[i]));
+
+                let obj = {
+                    recordId: Number(recIds[i]),
+                    lender: record.lender,
+                    token_id: Number(record.tokenId),
+                    copies: Number(record.copies),
+                    price: Number(record.price),
+                    startTime: Number(record.startTime),
+                    endTime: Number(record.endTime)
+                }
+
+                records.push(obj);
+            }
+            return (records);
+
+        } catch (error) {
+            console.log('error while getting marked records');
+            console.log(error);
+        }
+    }
+
+    async function msgSender() {
+        try {
+            const _signer = await Provider.provider.getSigner();
+            let _accAddress = await _signer.getAddress();
+            return _accAddress;
+        } catch (error) {
+            console.log('error while getting msg sender');
+            console.log(error);
+        }
+    }
+
+    async function getAllMarkedRecords() {
+        try {
+            let _contract = await contract.connect(Provider.signer);
+            let recIds = await _contract._recId();
+            let records = [];
+
+            for (let i = 0; i < recIds; i++) {
+                let record = await _contract._tokenRecords(i);
+                let nullAddress = '0x0000000000000000000000000000000000000000';
+
+                if (record.lender != nullAddress && record.lender != await msgSender() && record.rentedTo == nullAddress) {
+                    let obj = {
+                        recordId: Number(i),
+                        lender: record.lender,
+                        token_id: Number(record.tokenId),
+                        copies: Number(record.copies),
+                        price: Number(record.price),
+                        startTime: Number(record.startTime),
+                        endTime: Number(record.endTime)
+                    }
+                    records.push(obj);
+                }
+            }
+            return (records);
+        } catch (error) {
+            console.log('error while getting marked records');
+            console.log(error);
+        }
+    }
+
+    async function removeMarkedRecord(recId) {
+        try {
+            let _contract = await contract.connect(Provider.signer);
+            const tx = await _contract.removeFromRent(recId);
+
+            await tx ? console.log("Successfully removed marked record") : console.log("Error removing marked record");
+        } catch (error) {
+            console.log('error while removing marked record');
+            console.log(error);
+        }
     }
 
     async function markForRent(tokenId, copies, price, startTime, endTime) {
@@ -86,21 +195,6 @@ let ContractState = (props) => {
             const tx = await _contract.markForRent(tokenId, copies, price, startTime, endTime);
 
             await tx ? console.log("Successfully marked for rent") : console.log("Error marking for rent");
-
-            // let struct_tx = tx.map((transaction) => {
-            //    if (transaction.sender == account.address) {
-            //         return {
-            //             addressTo: transaction.receiver,
-            //             addressFrom: transaction.sender,
-            //             timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
-            //             message: transaction.message,
-            //             keyword: transaction.keyword,
-            //             amount: parseInt(transaction.amount._hex) / (10 ** 18)
-            //         }
-            //    }
-            // });
-
-            // return struct_tx;
         } catch (error) {
             console.log('error while marking token for rent');
             console.log(error);
@@ -121,11 +215,11 @@ let ContractState = (props) => {
                     let obj = {
                         recordId: Number(recordIds[j]),
                         lender: record.lender,
-                        token_id:  Number(record.tokenId),
-                        copies:  Number(record.copies),
-                        price:  Number(record.price),
-                        startTime:  Number(record.startTime),
-                        endTime:  Number(record.endTime)
+                        token_id: Number(record.tokenId),
+                        copies: Number(record.copies),
+                        price: Number(record.price),
+                        startTime: Number(record.startTime),
+                        endTime: Number(record.endTime)
                     }
 
                     records.push(obj);
@@ -136,6 +230,51 @@ let ContractState = (props) => {
 
         } catch (error) {
             console.log('error while getting marked records');
+            console.log(error);
+        }
+    }
+
+    async function getOnRentRecords() {
+        try {
+            let _contract = await contract.connect(Provider.signer);
+            let tokenIds = await _contract.getLenderAvailableTokens();
+            let records = [];
+
+            for (let i = 0; i < tokenIds.length; i++) {
+                let recordIds = await _contract.getOnRentRecordIds(Number(tokenIds[i]));
+
+                for (let j = 0; j < recordIds.length; j++) {
+                    let record = await _contract._tokenRecords(Number(recordIds[j]));
+                    let obj = {
+                        recordId: Number(recordIds[j]),
+                        lender: record.lender,
+                        token_id: Number(record.tokenId),
+                        copies: Number(record.copies),
+                        price: Number(record.price),
+                        startTime: Number(record.startTime),
+                        endTime: Number(record.endTime)
+                    }
+
+                    records.push(obj);
+                }
+            }
+
+            return (records);
+
+        } catch (error) {
+            console.log('error while getting onRent records');
+            console.log(error);
+        }
+    }
+
+    async function validateRecords() {
+        try {
+            let _contract = await contract.connect(Provider.signer);
+            const tx = await _contract.validateLendedTokens();
+
+            await tx ? console.log(`Successfully validated records (Removed: ${Number(tx)})`) : console.log("Error validating records record");
+        } catch (error) {
+            console.log('error while validating records record');
             console.log(error);
         }
     }
@@ -151,18 +290,18 @@ let ContractState = (props) => {
         }
     }
 
-    async function sendTransaction(obj) {
-        try {
-            let _contract = await contract.connect(Provider.signer);
-            const tx = await _contract.transfer(obj.addr, obj.msg, obj.keyword, { value: ethers.utils.parseEther(obj.amount) });
-            await tx.wait();
-            await refreshDetails();
-            // console.log(tx);
-        } catch (error) {
-            console.log('error while sending transaction');
-            console.log(error);
-        }
-    }
+    // async function sendTransaction(obj) {
+    //     try {
+    //         let _contract = await contract.connect(Provider.signer);
+    //         const tx = await _contract.transfer(obj.addr, obj.msg, obj.keyword, { value: ethers.utils.parseEther(obj.amount) });
+    //         await tx.wait();
+    //         await refreshDetails();
+    //         // console.log(tx);
+    //     } catch (error) {
+    //         console.log('error while sending transaction');
+    //         console.log(error);
+    //     }
+    // }
 
     let connectContract = async () => {
         const _contract = await new ethers.Contract(contractAddress, artifacts.abi, Provider.provider);

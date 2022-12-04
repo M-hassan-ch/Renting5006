@@ -14,7 +14,17 @@ export default function CreateNft() {
   const mintNft = async (e) => {
     const copies = document.getElementById('copies').value;
     // console.log(context.contract);
-    contractFunction.mint(parseInt(copies));
+    try {
+      if (parseInt(copies)>0){
+        contractFunction.mint(parseInt(copies));
+      }
+      else{
+        throw("Invalid no. of copies");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    
   }
 
   const handleFileUpload = (e) => {

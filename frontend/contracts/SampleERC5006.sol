@@ -8,6 +8,7 @@ import "./ERC5006.sol";
 //  ---Missing
 //  transfer service fee, rent fee
 //  Utility functions view Functions
+//  keep record of tokens minted by user
 
 contract SampleERC5006 is ERC5006, Ownable {
     
