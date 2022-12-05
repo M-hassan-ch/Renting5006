@@ -1,5 +1,7 @@
 import context from './contractContext';
 import artifacts from "../artifacts/contracts/SampleERC5006.sol/SampleERC5006.json";
+
+import shotenAddress from '../utility/shortenAddress'
 import { useState } from 'react';
 import { useEffect } from 'react';
 
@@ -112,22 +114,34 @@ let ContractState = (props) => {
             let _contract = await contract.connect(Provider.signer);
             let recIds = await _contract.getBorrowedRecordId();
             let records = [];
+            let expiredRecords = 0;
+
+            const currentBlock = await Provider.provider.getBlockNumber();
+            const timestamp = (await Provider.provider.getBlock(currentBlock)).timestamp;
 
             for (let i = 0; i < recIds.length; i++) {
                 let record = await _contract._tokenRecords(Number(recIds[i]));
 
-                let obj = {
-                    recordId: Number(recIds[i]),
-                    lender: record.lender,
-                    token_id: Number(record.tokenId),
-                    copies: Number(record.copies),
-                    price: Number(record.price),
-                    startTime: Number(record.startTime),
-                    endTime: Number(record.endTime)
+                if (!(Number(record.endTime) < timestamp)){
+                    let obj = {
+                        recordId: Number(recIds[i]),
+                        lender: record.lender,
+                        token_id: Number(record.tokenId),
+                        copies: Number(record.copies),
+                        price: Number(record.price),
+                        startTime: Number(record.startTime),
+                        endTime: Number(record.endTime),
+                        lendedTo: shotenAddress(record.rentedTo),
+                    }
+                    
+                    records.push(obj);
                 }
-
-                records.push(obj);
+                else{
+                    expiredRecords++;
+                }
             }
+
+            console.log(`Records Expired${expiredRecords}`);
             return (records);
 
         } catch (error) {
@@ -242,9 +256,11 @@ let ContractState = (props) => {
 
             for (let i = 0; i < tokenIds.length; i++) {
                 let recordIds = await _contract.getOnRentRecordIds(Number(tokenIds[i]));
-
+               
+                
                 for (let j = 0; j < recordIds.length; j++) {
                     let record = await _contract._tokenRecords(Number(recordIds[j]));
+                    
                     let obj = {
                         recordId: Number(recordIds[j]),
                         lender: record.lender,
@@ -252,10 +268,12 @@ let ContractState = (props) => {
                         copies: Number(record.copies),
                         price: Number(record.price),
                         startTime: Number(record.startTime),
-                        endTime: Number(record.endTime)
+                        endTime: Number(record.endTime),
+                        lendedTo: shotenAddress(record.rentedTo),
                     }
 
-                    records.push(obj);
+                    records.push(obj);   
+                    
                 }
             }
 

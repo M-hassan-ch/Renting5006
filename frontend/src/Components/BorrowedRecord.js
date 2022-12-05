@@ -6,17 +6,20 @@ export default function BorrowedRecord() {
     const context = useContext(Context);
     const contractFunction = context.contractFunction;
 
+    let refresh = async()=>{
+        if (context.contract) {
+            console.log("Updating borrowed rec list........ ")
+            contractFunction.getBorrowedRecords().then((result) => {
+                setRecords(result);
+                console.log("Updated borrowed rec list")
+            }).catch((err) => {
+                console.log(err);
+            });
+        }
+    }
     useEffect(() => {
         let temp = async () => {
-            if (context.contract) {
-                console.log("Updating borrowed rec list........ ")
-                contractFunction.getBorrowedRecords().then((result) => {
-                    setRecords(result);
-                    console.log("Updated borrowed rec list")
-                }).catch((err) => {
-                    console.log(err);
-                });
-            }
+            await refresh();
         }
         temp();
     }, [context.contract, context.account])

@@ -28,7 +28,7 @@ export default function Marketplace() {
     async function borrowRecord(recId, price){
       try {
           await contractFunction.borrowToken(recId, price);
-          await setTimeout(refresh, 5000);
+          await setTimeout(refresh, 4000);
       } catch (error) {
           console.log(error);
       }
@@ -38,9 +38,9 @@ export default function Marketplace() {
         return (
             <>
                 <div className="col-md-3 border border-primary">
-                    <div>Record Id: {props.recId}</div>
                     <div>TokenId: {props.tknId}</div>
                     <div>Price: {props.price}</div>
+                    <div>Expiration time: {props.endTime}</div>
 
                     <div><img src="" alt="" /></div>
                     <div>

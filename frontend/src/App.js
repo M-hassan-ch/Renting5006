@@ -1,13 +1,10 @@
 import Navbar from './Components/Navbar';
 import CreateNft from './Components/CreateNft';
 import Marketplace from './Components/Marketplace';
-import ViewMyNft from './Components/ViewMyNft';
 import MarkForRent from './Components/MarkForRent';
 import MarkedRecord from './Components/MarkedRecord';
 import BorrowedRecord from './Components/BorrowedRecord';
 import OnRentRecord from './Components/OnRentRecord';
-import Purchases from './Components/Purchases'
-import './App.css';
 import React from 'react';
 import { ContractState } from './context/contractState';
 import {

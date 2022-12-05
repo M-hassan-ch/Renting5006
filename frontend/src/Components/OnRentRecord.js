@@ -23,19 +23,11 @@ export default function OnRentRecord() {
             await setTimeout(refresh, 5000);
         }
         temp();
-    }, [context.contract, context.account])
-
-    // async function removeRecord(recId){
-    //     try {
-    //         contractFunction.removeRecord(recId);
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    }, [])
 
     async function validate(){
         contractFunction.validateRecords().then(async()=>{
-            await refresh()
+            await setTimeout(refresh, 4000);
         });
     }
 
@@ -46,7 +38,9 @@ export default function OnRentRecord() {
                     <div>Record Id: {props.recId}</div>
                     <div>TokenId: {props.tknId}</div>
                     <div>Price: {props.price}</div>
-
+                    <div>Expiration time: {props.endTime}</div>
+                    <div>Lended To: {props.lendedTo}</div>
+                    
                     <div><img src="" alt="" /></div>
                 </div>
             </>
@@ -67,12 +61,10 @@ export default function OnRentRecord() {
                             </div>
                         )
                     }
-
-
                 </div>
                 <div className="row">
                     {Records && Records.map((obj, i) => {
-                        return <Card key={i} recId={obj.recordId} tknId={obj.token_id} copies={obj.copies} startTime={obj.startTime} endTime={obj.endTime} price={obj.price} />
+                        return <Card key={i} recId={obj.recordId} tknId={obj.token_id} copies={obj.copies} startTime={obj.startTime} endTime={obj.endTime} price={obj.price} lendedTo = {obj.lendedTo}/>
                     })}
                 </div>
             </div>
