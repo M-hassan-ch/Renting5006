@@ -20,14 +20,14 @@ export default function OnRentRecord() {
 
     useEffect(() => {
         let temp = async () => {
-            await setTimeout(refresh, 5000);
+            await setTimeout(refresh, 3000);
         }
         temp();
-    }, [])
+    }, [context.account])
 
     async function validate(){
         contractFunction.validateRecords().then(async()=>{
-            await setTimeout(refresh, 4000);
+            await setTimeout(refresh, 3000);
         });
     }
 

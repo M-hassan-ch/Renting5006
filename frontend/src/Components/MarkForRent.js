@@ -13,7 +13,7 @@ export default function MarkForRent() {
         const start = document.getElementById('start').value;
         const end = document.getElementById('end').value;
         // console.log(context.contract);
-        contractFunction.markForRent(parseInt(tknId),parseInt(copies), parseInt(price), parseInt(start),parseInt(end));
+        contractFunction.markForRent(parseInt(tknId),parseInt(copies), price, parseInt(start),parseInt(end));
       }
 
     return (

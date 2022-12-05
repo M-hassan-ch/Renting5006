@@ -22,7 +22,7 @@ export default function BorrowedRecord() {
             await refresh();
         }
         temp();
-    }, [context.contract, context.account])
+    }, [context.account]);
 
 
     function Card(props) {

@@ -23,12 +23,14 @@ export default function MarkedRecord() {
             await refresh();        
         }
         temp();
-    }, [])
+    }, [context.account])
 
     async function removeRecord(recId){
         try {
-            contractFunction.removeRecord(recId);
-            await setTimeout(refresh, 4000);
+            contractFunction.removeRecord(recId).then(async()=>{
+                await setTimeout(refresh, 3000);
+            });
+            
         } catch (error) {
             console.log("Error while removing the records");
             console.log(error);

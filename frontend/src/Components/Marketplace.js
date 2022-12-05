@@ -5,12 +5,14 @@ export default function Marketplace() {
     const [Records, setRecords] = useState(null)
     const context = useContext(Context);
     const contractFunction = context.contractFunction;
+    const [Enable, setEnable] = useState(true)
 
     let refresh = async () => {
       if (context.contract) {
           console.log("Updating marketplace rec list........ ")
           contractFunction.getAllMarkedRecords().then((result) => {
               setRecords(result);
+              setEnable(false);
               console.log("Updated marketplace rec list")
           }).catch((err) => {
               console.log(err);
@@ -23,12 +25,14 @@ export default function Marketplace() {
             await refresh();
         }
         temp();
-    }, [context.contract, context.account])
+    }, [context.account])
 
     async function borrowRecord(recId, price){
       try {
-          await contractFunction.borrowToken(recId, price);
-          await setTimeout(refresh, 4000);
+        setEnable(true);
+          contractFunction.borrowToken(recId, price).then(async()=>{
+            await setTimeout(refresh, 3000);
+          });
       } catch (error) {
           console.log(error);
       }
@@ -44,7 +48,7 @@ export default function Marketplace() {
 
                     <div><img src="" alt="" /></div>
                     <div>
-                    <div><button className="btn btn-primary mt-4 px-4 py-2" type='button' onClick={()=> borrowRecord(props.recId, props.price)}><b>Borrow</b></button></div>
+                    <div><button className="btn btn-primary mt-4 px-4 py-2" type='button' onClick={()=> borrowRecord(props.recId, props.price)} disabled = {Enable}><b>Borrow</b></button></div>
                     </div>
                 </div>
             </>

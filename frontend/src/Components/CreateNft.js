@@ -16,7 +16,10 @@ export default function CreateNft() {
     // console.log(context.contract);
     try {
       if (parseInt(copies)>0){
-        contractFunction.mint(parseInt(copies));
+//
+
+//  
+contractFunction.mint(parseInt(copies));
       }
       else{
         throw("Invalid no. of copies");
