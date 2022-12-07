@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Context from '../context/contractContext';
 import axios from 'axios';
-import { reject, template } from 'underscore';
-import { resolvePath } from 'react-router-dom';
 
 
 // https://gateway.pinata.cloud/ipfs/QmYXEZGtq2pSS7ESzSxHvzqWBokqAmwSB6UiEJAzx8CM2u
@@ -24,7 +22,6 @@ export default function CreateNft() {
   
   const sendFileToIPFS = async (data, fileName) => {
     try {
-      console.log('got file ', File);
       const formData = new FormData();
       formData.append('file', data, fileName);
       
@@ -77,8 +74,7 @@ export default function CreateNft() {
         if (resFile){
           const ImgHash = `https://ipfs.io/ipfs/${resFile.data.IpfsHash}`;
           setMetaDataHash(resFile.data.IpfsHash);
-          return resFile.data.IpfsHash
-          console.log("json successfully sent to IPFS", ImgHash);       
+          return resFile.data.IpfsHash;   
         }
       }
       else{console.log('Error. null file hash');}
@@ -92,43 +88,15 @@ export default function CreateNft() {
     
     const responseFuncOne = await sendFileToIPFS(File, File.name);
     if(responseFuncOne){
-    console.log("response1",responseFuncOne);
+      // console.log("response1",responseFuncOne);
+      setFileHash(responseFuncOne);
       const responseFuncTwo = await sendMetaDataToIPFS(responseFuncOne);
-    console.log("response2",responseFuncTwo)
-
+      // console.log("response2",responseFuncTwo)
+      if (responseFuncTwo){
+        setMetaDataHash(responseFuncTwo);  
+        return responseFuncTwo;
+      }
     }
-    // let promise1 = new Promise((resolve,reject)=>{
-    //   sendFileToIPFS(File, File.name).then(()=>{
-    //     resolve(1);
-    //   }).catch((error)=>{
-    //     reject(-1);
-    //     console.log(error);
-    //   })
-    // })
-    
-    // let promise2 = new Promise((resolve,reject)=>{
-    //   sendMetaDataToIPFS().then(()=>{
-    //     resolve(1);
-    //   }).catch((error)=>{
-    //     reject(-1);
-    //     console.log(error);
-    //   })
-    // })
-    
-    // promise1.then(()=>{
-    //   promise2.then(()=>{
-    //     console.log('Data uploaded succesfully');
-    //   }).catch((error)=>{
-    //     console.log("Json upload Promise Rejected: - ", error);
-    //   });
-    // }).catch((error)=>{
-    //   console.log("File upload Promise Rejected: - ", error);
-    // });
-    // sendFileToIPFS(File, File.name).then(async()=>{
-    //   if (FileHash){
-    //     await sendMetaDataToIPFS()
-    //   }
-    // });
     
   }
   
@@ -137,8 +105,22 @@ export default function CreateNft() {
     try {
       if (parseInt(copies)>0 && File){
         setIsDisabled(true);
-        await uploadDataToIPFS();    
-        // tokens will be minted on useEffect
+        let metaHash = await uploadDataToIPFS();
+        
+        if (metaHash){
+          contractFunction.mint(metaHash, parseInt(copies)).then(()=>{
+            setTimeout(()=>{
+              setFileHash(null);
+              setMetaDataHash(null);
+              setIsDisabled(false);
+            }, 3000);
+          });
+        
+        }
+        else{
+          console.log("Error while uploading the files");
+        }
+        
       }
       else{
         throw("Cant mint Nft. invalid copy or null file");
@@ -149,29 +131,13 @@ export default function CreateNft() {
     
   }
   
-  useEffect(() => {
-    if (FileHash!=null && MetaDataHash!=null){
-      console.log("File ", FileHash);
-      console.log("metadata", MetaDataHash);
-      setTimeout(()=>{
-        setFileHash(null);
-        setMetaDataHash(null);
-        setIsDisabled(false);
-      }, 3000);
-      // contractFunction.mint(parseInt(copies)).then(()=>{
-      //   setTimeout(()=>{
-      //     setFileHash(null);
-      //     setMetaDataHash(null);
-      //     isDisabled = false;
-      //   }, 3000);
-      // });
-    }
-  }, [FileHash, MetaDataHash])
-  
   
   return (
     <>
     <h2 style={{ textAlign: 'center' }}>logged in address: - {context.account.address}</h2>
+    <h4 style={{ textAlign: 'center' }}>File Hash: {FileHash}</h4>
+    <h4 style={{ textAlign: 'center' }}>Metadata Hash: {MetaDataHash}</h4>
+    
     <div className="container mt-5">
     <div className="row justify-content-center">
     <div className="col-md-6 shadow rounded border border-primary">
