@@ -14,7 +14,7 @@ let ContractState = (props) => {
     const [Provider, setProvider] = useState({ provider: null, signer: null });
     
     
-    const contractAddress = '0x0cd0F64b7625BbF422ba5DC661F4A5bc0e8Fbe6B'; //0xbb2dE0f9E901Bc4E7a6Dd6e6aa6173f29aAe7557
+    const contractAddress = '0x0cd0F64b7625BbF422ba5DC661F4A5bc0e8Fbe6B'; // '0x557a6A36AaaE71daf7e061CAF8D87c75cB7d9718';  // 0x0cd0F64b7625BbF422ba5DC661F4A5bc0e8Fbe6B
     
     window.ethereum.on('accountsChanged', async function (accounts) {
         if (Provider.provider) {
@@ -129,13 +129,15 @@ let ContractState = (props) => {
             let records = [];
             let expiredRecords = 0;
             
-            const currentBlock = await Provider.provider.getBlockNumber();
-            const timestamp = (await Provider.provider.getBlock(currentBlock)).timestamp;
+            // const currentBlock = await Provider.provider.getBlockNumber();
+            // const timestamp = (await Provider.provider.getBlock(currentBlock)).timestamp;
+            const timestamp = (Math.floor(Date.now() / 1000));
             
             for (let i = 0; i < recIds.length; i++) {
                 let record = await _contract._tokenRecords(Number(recIds[i]));
+                let _uri = await getUri(record.tokenId);
                 
-                if (!(Number(record.endTime) < timestamp)){
+                if (_uri && record && !(Number(record.endTime) < timestamp)){
                     let obj = {
                         recordId: Number(recIds[i]),
                         lender: record.lender,
@@ -145,6 +147,7 @@ let ContractState = (props) => {
                         startTime: Number(record.startTime),
                         endTime: Number(record.endTime),
                         lendedTo: shotenAddress(record.rentedTo),
+                        uri:_uri,
                     }
                     
                     records.push(obj);
@@ -172,8 +175,10 @@ let ContractState = (props) => {
             for (let i = 0; i < recIds; i++) {
                 let record = await _contract._tokenRecords(i);
                 let nullAddress = '0x0000000000000000000000000000000000000000';
+                let _uri = await getUri(record.tokenId);
                 
-                if (record.lender != nullAddress && record.lender != await msgSender() && record.rentedTo == nullAddress) {
+                if (_uri && record && record.lender != nullAddress && record.lender != await msgSender() && record.rentedTo == nullAddress) {
+                    
                     let obj = {
                         recordId: Number(i),
                         lender: record.lender,
@@ -181,7 +186,8 @@ let ContractState = (props) => {
                         copies: Number(record.copies),
                         price: ethers.utils.formatEther(ethers.BigNumber.from(`${record.price}`)),
                         startTime: Number(record.startTime),
-                        endTime: Number(record.endTime)
+                        endTime: Number(record.endTime),
+                        uri:_uri,
                     }
                     records.push(obj);
                 }
@@ -216,7 +222,7 @@ let ContractState = (props) => {
                             endTime: Number(record.endTime),
                             uri:_uri,
                         }
-                          
+                        
                         records.push(obj);
                     }
                     
@@ -243,19 +249,23 @@ let ContractState = (props) => {
                 
                 for (let j = 0; j < recordIds.length; j++) {
                     let record = await _contract._tokenRecords(Number(recordIds[j]));
+                    let _uri = await getUri(record.tokenId);
                     
-                    let obj = {
-                        recordId: Number(recordIds[j]),
-                        lender: record.lender,
-                        token_id: Number(record.tokenId),
-                        copies: Number(record.copies),
-                        price: ethers.utils.formatEther(ethers.BigNumber.from(`${record.price}`)),
-                        startTime: Number(record.startTime),
-                        endTime: Number(record.endTime),
-                        lendedTo: shotenAddress(record.rentedTo),
+                    if (_uri && record){
+                        let obj = {
+                            recordId: Number(recordIds[j]),
+                            lender: record.lender,
+                            token_id: Number(record.tokenId),
+                            copies: Number(record.copies),
+                            price: ethers.utils.formatEther(ethers.BigNumber.from(`${record.price}`)),
+                            startTime: Number(record.startTime),
+                            endTime: Number(record.endTime),
+                            lendedTo: shotenAddress(record.rentedTo),
+                            uri:_uri,
+                        }
+                        
+                        records.push(obj);   
                     }
-                    
-                    records.push(obj);   
                     
                 }
             }

@@ -115,7 +115,7 @@ export default function CreateNft() {
               setIsDisabled(false);
             }, 3000);
           });
-        
+          
         }
         else{
           console.log("Error while uploading the files");

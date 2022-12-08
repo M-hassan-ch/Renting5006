@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Context from '../context/contractContext';
+import axios from 'axios';
 
 export default function OnRentRecord() {
     const [Records, setRecords] = useState(null)
     const context = useContext(Context);
     const contractFunction = context.contractFunction;
-
+    
     let refresh = async () => {
         if (context.contract) {
             console.log("Updating onRent rec list........")
@@ -17,58 +18,69 @@ export default function OnRentRecord() {
             });
         }
     }
-
+    
     useEffect(() => {
         let temp = async () => {
             await setTimeout(refresh, 3000);
         }
         temp();
     }, [context.account])
-
+    
     async function validate(){
         contractFunction.validateRecords().then(async()=>{
             await setTimeout(refresh, 3000);
         });
     }
-
+    
     function Card(props) {
+        const [Uri, setUri] = useState(null);
+        
+        let extractUri = async(uri)=>{
+            let res = await axios.get(`https://ipfs.io/ipfs/${uri}`);
+            if (res){
+                setUri(res.data.data);
+            }
+        }
         return (
             <>
-                <div className="col-md-3 border border-primary">
-                    <div>Record Id: {props.recId}</div>
-                    <div>TokenId: {props.tknId}</div>
-                    <div>Price: {props.price}</div>
-                    <div>Expiration time: {props.endTime}</div>
-                    <div>Lended To: {props.lendedTo}</div>
-                    
-                    <div><img src="" alt="" /></div>
-                </div>
+            <div className="col-md-3 border border-primary">
+            <div>Record Id: {props.recId}</div>
+            <div>TokenId: {props.tknId}</div>
+            <div>Price: {props.price}</div>
+            <div>Expiration time: {props.endTime}</div>
+            <div>Lended To: {props.lendedTo}</div>
+            
+            {extractUri(props.uri) && 
+                <div><img src={`https://ipfs.io/ipfs/${Uri}`} alt="Image" height={'200px'} width={'250px'}/></div>       
+            }
+            </div>
             </>
-        )
-    }
-
-    return (
-        <>
+            )
+        }
+        
+        return (
+            <>
             <h1 style={{ textAlign: 'center' }}>OnRent Record</h1>
-
-
+            
+            
             <div className="container">
-                <div className="row justify-content-end">
-                    {
-                        Records && Records.length && (
-                            <div className="col-md-1 ">
-                                <button className="btn btn-danger" onClick={validate}>Validate</button>
-                            </div>
-                        )
-                    }
+            <div className="row justify-content-end">
+            {
+                Records && Records.length && (
+                    <div className="col-md-1 ">
+                    <button className="btn btn-danger" onClick={validate}>Validate</button>
+                    </div>
+                    )
+                }
                 </div>
                 <div className="row">
-                    {Records && Records.map((obj, i) => {
-                        return <Card key={i} recId={obj.recordId} tknId={obj.token_id} copies={obj.copies} startTime={obj.startTime} endTime={obj.endTime} price={obj.price} lendedTo = {obj.lendedTo}/>
-                    })}
+                {Records && Records.map((obj, i) => {
+                    return <Card key={i} uri={obj.uri} recId={obj.recordId} tknId={obj.token_id} copies={obj.copies} startTime={obj.startTime} endTime={obj.endTime} price={obj.price} lendedTo = {obj.lendedTo}/>
+                })}
                 </div>
-            </div>
-            <hr />
-        </>
-    )
-}
+                </div>
+                <hr />
+                </>
+                )
+            }
+            

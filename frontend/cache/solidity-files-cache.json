@@ -445,8 +445,8 @@
       ]
     },
     "/home/hassan/Blockchain/React Projects/Renting5006/frontend/contracts/SampleERC5006.sol": {
-      "lastModificationDate": 1670414319866,
-      "contentHash": "3b76519f1435eb23b6ea19323e3d4af5",
+      "lastModificationDate": 1670497008871,
+      "contentHash": "d56a6cd27cf39cd884133f40b77b5ce4",
       "sourceName": "contracts/SampleERC5006.sol",
       "solcConfig": {
         "version": "0.8.15",
