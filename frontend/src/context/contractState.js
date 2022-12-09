@@ -14,7 +14,7 @@ let ContractState = (props) => {
     const [Provider, setProvider] = useState({ provider: null, signer: null });
     
     
-    const contractAddress = '0x0cd0F64b7625BbF422ba5DC661F4A5bc0e8Fbe6B'; // '0x557a6A36AaaE71daf7e061CAF8D87c75cB7d9718';  // 0x0cd0F64b7625BbF422ba5DC661F4A5bc0e8Fbe6B
+    const contractAddress = '0x620AFb95054E8B74B243E1eF4c9005dCd8495848';
     
     window.ethereum.on('accountsChanged', async function (accounts) {
         if (Provider.provider) {
