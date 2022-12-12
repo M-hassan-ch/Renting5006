@@ -96,21 +96,32 @@ let ContractState = (props) => {
             let balance = (Number(await _signer.getBalance()));
             if (balance >= Number(ethers.utils.parseEther(price))) {
                 let _contract = await contract.connect(Provider.signer);
-                const options = { value: Number(ethers.utils.parseEther(price)) };
-                const tx = await _contract.borrowToken(recId, options);
+                let record = await _contract._tokenRecords(Number(recId));
+                const currentTimestamp = (Math.floor(Date.now() / 1000));
                 
-                await tx.wait() ? console.log("Successfully buyed record") : console.log("Error buying record");
+                if (record && currentTimestamp >= Number(record.startTime) && currentTimestamp < Number(record.endTime)){
+                    const options = { value: Number(ethers.utils.parseEther(price)) };
+                    const tx = await _contract.borrowToken(recId, options);
+                    
+                    await tx.wait() ? console.log("Successfully buyed record") : console.log("Error buying record");
+                }
+                else{
+                    alert("Buying record in an invalid interval");
+                    throw("Buying record in an invalid interval");
+                }
+                
+                
             }
             else {
-                throw ('Insufficient balance.')
+                alert('Insufficient balance.');
+                throw('Insufficient balance.');
             }
         } catch (error) {
             console.log('error while buying record');
             console.log(error);
         }
     }
-    
-    
+      
     async function msgSender() {
         try {
             const _signer = await Provider.provider.getSigner();
@@ -171,13 +182,14 @@ let ContractState = (props) => {
             let _contract = await contract.connect(Provider.signer);
             let recIds = await _contract._recId();
             let records = [];
+            const currentTimestamp = (Math.floor(Date.now() / 1000));
             
             for (let i = 0; i < recIds; i++) {
                 let record = await _contract._tokenRecords(i);
-                let nullAddress = '0x0000000000000000000000000000000000000000';
+                const nullAddress = '0x0000000000000000000000000000000000000000';
                 let _uri = await getUri(record.tokenId);
                 
-                if (_uri && record && record.lender != nullAddress && record.lender != await msgSender() && record.rentedTo == nullAddress) {
+                if (_uri && record && record.lender != nullAddress && record.lender != await msgSender() && record.rentedTo == nullAddress && currentTimestamp < Number(record.endTime)) {
                     
                     let obj = {
                         recordId: Number(i),
@@ -204,6 +216,7 @@ let ContractState = (props) => {
             let _contract = await contract.connect(Provider.signer);
             let tokenIds = await _contract.getLenderAvailableTokens();
             let records = [];
+            const currentTimestamp = (Math.floor(Date.now() / 1000));
             
             for (let i = 0; i < tokenIds.length; i++) {
                 let recordIds = await _contract.getMarkedRecordIds(Number(tokenIds[i]));
@@ -212,6 +225,12 @@ let ContractState = (props) => {
                     let record = await _contract._tokenRecords(Number(recordIds[j]));
                     let _uri = await getUri(record.tokenId);
                     if (_uri && record){
+                        let _status = '';
+
+                        if (!(currentTimestamp < Number(record.endTime))){
+                            _status = 'End Date Expired';
+                        }
+
                         let obj = {
                             recordId: Number(recordIds[j]),
                             lender: record.lender,
@@ -221,6 +240,7 @@ let ContractState = (props) => {
                             startTime: Number(record.startTime),
                             endTime: Number(record.endTime),
                             uri:_uri,
+                            status: _status
                         }
                         
                         records.push(obj);
@@ -242,6 +262,7 @@ let ContractState = (props) => {
             let _contract = await contract.connect(Provider.signer);
             let tokenIds = await _contract.getLenderAvailableTokens();
             let records = [];
+            const currentTimestamp = (Math.floor(Date.now() / 1000));
             
             for (let i = 0; i < tokenIds.length; i++) {
                 let recordIds = await _contract.getOnRentRecordIds(Number(tokenIds[i]));
@@ -252,6 +273,12 @@ let ContractState = (props) => {
                     let _uri = await getUri(record.tokenId);
                     
                     if (_uri && record){
+                        let _status = '';
+
+                        if (!(currentTimestamp < Number(record.endTime))){
+                            _status = 'End Date Expired';
+                        }
+
                         let obj = {
                             recordId: Number(recordIds[j]),
                             lender: record.lender,
@@ -262,6 +289,7 @@ let ContractState = (props) => {
                             endTime: Number(record.endTime),
                             lendedTo: shotenAddress(record.rentedTo),
                             uri:_uri,
+                            status: _status
                         }
                         
                         records.push(obj);   
@@ -293,9 +321,17 @@ let ContractState = (props) => {
     async function markForRent(tokenId, copies, price, startTime, endTime) {
         try {
             let _contract = await contract.connect(Provider.signer);
-            const tx = await _contract.markForRent(tokenId, copies, ethers.utils.parseEther(price), startTime, endTime);
             
-            await tx ? console.log("Successfully marked for rent") : console.log("Error marking for rent");
+            const copiesOwned = await _contract.balanceOf(account.address, tokenId);
+
+            if (copiesOwned && Number(copiesOwned) >= parseInt(copies)){
+                const tx = await _contract.markForRent(tokenId, copies, ethers.utils.parseEther(price), startTime, endTime);
+                await tx.wait() ? console.log("Successfully marked for rent") : console.log("Error marking for rent");
+            }
+            else{
+                alert("Donot have enough token copies");
+                throw("Donot have enough token copies");
+            }
         } catch (error) {
             console.log('error while marking token for rent');
             console.log(error);
