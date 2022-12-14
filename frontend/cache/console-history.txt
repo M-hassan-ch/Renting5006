@@ -1,0 +1,40 @@
+await _contract.connect(addr1).owner();
+await _contract.connect(addr1.address).owner();
+await _contract.owner();
+_contract
+await _contract.owner();
+_contract = await ethers.getContractAt('SampleERC5006', '0x5FbDB2315678afecb367f032d93F642f64180aa3')
+a = await _contract.connect(addr1.address)._recId();
+let addr1 = await ethers.getSigner()
+a = await _contract.connect(await ethers.getSigner)._recId();
+a = await _contract.connect((await ethers.getSigner).address)._recId();
+a = await _contract._recId();
+a = await _contract.owner();
+let a = await _contract.owner();
+_contract
+await _contract._tokenId()
+await _contract.owner()
+_contract = await _contract.attach('0x5FbDB2315678afecb367f032d93F642f64180aa3')
+_contract = await _contract.attact('0x5FbDB2315678afecb367f032d93F642f64180aa3')
+_contract  = await ethers.getContractFactory('SampleERC5006')
+_contract  = ethers.getContractFactory('SampleERC5006')
+let _contract  = ethers.getContractFactory('SampleERC5006')
+let _contract  = ethers.getContractFactory('Sample5006')
+let contract  = ethers.getContractFactory('Sample5006')
+let c = ethers.Contract.attach('0x5FbDB2315678afecb367f032d93F642f64180aa3')
+const contract = ethers.Contract.attach('0x5FbDB2315678afecb367f032d93F642f64180aa3')
+const contract = ethers.contract.attach('0x5FbDB2315678afecb367f032d93F642f64180aa3')
+contract
+a.address
+let a = await ethers.getSigner();
+await ethers.getSigner().address
+await ethers.getSigner()
+await ethers.getsigner()
+...clean
+clean()
+clean
+clear()
+clear
+typeof(await ethers.getSigners())
+await ethers.getSigners()
+ethers.getSigners()
