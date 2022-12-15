@@ -10,48 +10,120 @@ describe("Renting5006 Tokens", function () {
 
   async function deployContract() {
     // Contracts are deployed using the first signer/account by default
-    const currentSigner = (await ethers.getSigner()).address;
+    const currentSigner = (await ethers.getSigner());
     const raw = await ethers.getContractFactory("SampleERC5006");
     const contract = await raw.deploy();
 
     await contract.deployed();
-    
-    console.log(
-      `Contract deployed at ${contract.address}`
-    );
+
+    // console.log(
+    //   `Contract deployed at ${contract.address}`
+    //   );
 
     return [currentSigner, contract];
-    
+
   }
 
   describe("Deployment", function () {
     it("Should set the right owner", async function () {
       const [currentSigner, contract] = await loadFixture(deployContract);
-      expect(currentSigner).to.equal(await contract.owner());
+      expect(currentSigner.address).to.equal(await contract.owner());
+    });
+  });
+
+  describe("Minting", function () {
+
+    let beforeTokenID;
+    const uri = '123';
+    const copies = 5;
+
+    it("Should increment token Id", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
+
+      beforeTokenID = Number(await contract._tokenId());
+
+      await contract.connect(currentSigner).mintToken(uri, copies);
+      const currentTokenID = Number(await contract._tokenId());
+
+      expect(beforeTokenID + 1).to.equal(currentTokenID);
     });
 
-    // it("Should set the right owner", async function () {
-    //   const { lock, owner } = await loadFixture(deployOneYearLockFixture);
+    it("Should set correct token URI and token copies", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
 
-    //   expect(await lock.owner()).to.equal(owner.address);
-    // });
+      await contract.connect(currentSigner).mintToken(uri, copies);
+      const _uri = await contract._uri(`${beforeTokenID}`);
+      expect(_uri).to.equal(uri);
+      expect(copies).to.equal(Number(await contract.connect(currentSigner).balanceOf(currentSigner.address, beforeTokenID)));
+    });
+  });
 
-    // it("Should receive and store the funds to lock", async function () {
-    //   const { lock, lockedAmount } = await loadFixture(
-    //     deployOneYearLockFixture
-    //   );
+  describe("Marking For Rent", function () {
+    let tokenId, copies, price, startTime, endTime;
+    tokenId = copies = price = startTime = endTime = 0;
 
-    //   expect(await ethers.provider.getBalance(lock.address)).to.equal(
-    //     lockedAmount
-    //   );
-    // });
+    it("Should reject request if renting price is not greater than zero", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
+      await expect(contract.connect(currentSigner).markForRent(tokenId, copies,price,startTime, endTime)).to.be.revertedWith(
+        "Sample5006: Renting price should be be geater than zero"
+      );
+    });
 
-    // it("Should fail if the unlockTime is not in the future", async function () {
-    //   // We don't use the fixture here because we want a different deployment
-    //   const latestTime = await time.latest();
-    //   const Lock = await ethers.getContractFactory("Lock");
-    //   await expect(Lock.deploy(latestTime, { value: 1 })).to.be.revertedWith(
-    //     "Unlock time should be in the future"
+    it("Should reject request if start and end time is not greater than zero", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
+      price=1;
+      await expect(contract.connect(currentSigner).markForRent(tokenId, copies,price,startTime, endTime)).to.be.revertedWith(
+        "Sample5006: Timestamps cannot be zero"
+      );
+    });
+
+    it("Should reject request if start time is greater than end time", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
+      startTime = 5; endTime = 2;
+      await expect(contract.connect(currentSigner).markForRent(tokenId, copies,price,startTime, endTime)).to.be.revertedWith(
+        "Sample5006: Start time should be less than end time"
+      );
+    });
+
+    it("Should reject request if end time is lesser than current time", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
+      endTime = 100;
+      await expect(contract.connect(currentSigner).markForRent(tokenId, copies,price,startTime, endTime)).to.be.revertedWith(
+        "Sample5006: End time should be greater than current time"
+      );
+    });
+
+    it("Should not allow lender to mark a token for rent which he/she dont have enough copies", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
+      tokenId = 1238291083120120; copies = 6;
+      await expect(contract.connect(currentSigner).markForRent(tokenId, copies,price,startTime, endTime)).to.be.revertedWith(
+        "Sample5006: Lender dont have enough token copies"
+      );
+    });
+
+    it("Should allow token to be marked as rent if all the arguments are valid", async function () {
+      const [currentSigner, contract] = await loadFixture(deployContract);
+      tokenId = 0; copies = 1; price = 10; endTime = (Math.floor(Date.now() / 1000)) + 60;
+      
+      await contract.connect(currentSigner).mintToken('my URI', '100');
+      await contract.connect(currentSigner).markForRent(tokenId, copies,price,startTime, endTime);
+      
+      const recId = await contract.connect(currentSigner)._recId();
+      const record = await contract.connect(currentSigner)._tokenRecords(recId -1);
+      
+      expect(Number(record.tokenId)).to.equal(tokenId);
+      expect(Number(record.price)).to.equal(price);
+      expect(Number(record.copies)).to.equal(copies);
+      expect(Number(record.startTime)).to.equal(startTime);
+      expect(Number(record.endTime)).to.equal(endTime);
+      expect(record.lender).to.equal(currentSigner.address);
+      expect(record.rentedTo).to.equal('0x0000000000000000000000000000000000000000');
+    });
+
+    // it("Should not allow lender to mark a token for rent which he/she dont have enough copies", async function () {
+    //   const [currentSigner, contract] = await loadFixture(deployContract);
+    //   await expect(lock.withdraw()).to.be.revertedWith(
+    //     "You can't withdraw yet"
     //   );
     // });
   });
