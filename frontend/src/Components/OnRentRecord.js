@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Context from '../context/contractContext';
+import {convertToDate, } from "../utility/convertTime";
 import axios from 'axios';
 
 export default function OnRentRecord() {
@@ -55,7 +56,7 @@ export default function OnRentRecord() {
                     <div>Record Id: {props.recId}</div>
                     <div>TokenId: {props.tknId}</div>
                     <div>Price: {props.price}</div>
-                    <div>Expiration time: {props.endTime}</div>
+                    <div>Expiration time: {convertToDate(props.endTime)}</div>
                     <div>Lended To: {props.lendedTo}</div>
 
                     {extractUri(props.uri) &&

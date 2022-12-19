@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Context from '../context/contractContext';
+import {convertToDate, } from "../utility/convertTime";
+
 import axios from 'axios';
 
 export default function Marketplace() {
@@ -58,7 +60,7 @@ export default function Marketplace() {
                 <div className="col-md-3 rounded shadow py-2 border border-primary">
                     <div>TokenId: {props.tknId}</div>
                     <div>Price: {props.price}</div>
-                    <div>Expiration time: {props.endTime}</div>
+                    <div>Expiration time: {convertToDate(props.endTime)}</div>
 
                     {extractUri(props.uri) &&
                         <div><img src={`https://ipfs.io/ipfs/${Uri}`} alt="Image" height={'200px'} width={'250px'} /></div>

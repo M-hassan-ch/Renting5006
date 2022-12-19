@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useState, useEffect, useContext } from 'react';
+import {convertToDate, } from "../utility/convertTime";
 import Context from '../context/contractContext';
 
 export default function MarkedRecord() {
@@ -9,7 +10,7 @@ export default function MarkedRecord() {
 
     let refresh = async () => {
         if (context.contract) {
-            console.log("Updating marked rec list........ account, contract change detected")
+            console.log("Updating marked rec list........ ")
             contractFunction.getMarkedRecords().then((result) => {
                 setRecords(result);
                 console.log("Updated marked rec list")
@@ -33,6 +34,7 @@ export default function MarkedRecord() {
             });
 
         } catch (error) {
+            alert("Error while removing the records");
             console.log("Error while removing the records");
             console.log(error);
         }
@@ -59,7 +61,7 @@ export default function MarkedRecord() {
                     <div>Record Id: {props.recId}</div>
                     <div>TokenId: {props.tknId}</div>
                     <div>Price: {props.price}</div>
-                    <div>Expiration time: {props.endTime}</div>
+                    <div>Expiration time: {convertToDate(props.endTime)}</div>
                     {extractUri(props.uri) &&
                         <div><img src={`https://ipfs.io/ipfs/${Uri}`} alt="Image" height={'200px'} width={'250px'} /></div>
                     }
@@ -80,7 +82,7 @@ export default function MarkedRecord() {
             <div className="container">
                 <div className="row justify-content-evenly">
                     {Records && Records.map((obj, i) => {
-                        return <Card key={i} index = {i} status={obj.status} recId={obj.recordId} tknId={obj.token_id} copies={obj.copies} startTime={obj.startTime} endTime={obj.endTime} price={obj.price} uri={obj.uri} />
+                        return <Card key={i} index = {i} frozen={obj.frozen} status={obj.status} recId={obj.recordId} tknId={obj.token_id} copies={obj.copies} startTime={obj.startTime} endTime={obj.endTime} price={obj.price} uri={obj.uri} />
                     })}
                 </div>
             </div>

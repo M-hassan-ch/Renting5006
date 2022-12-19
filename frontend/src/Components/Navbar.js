@@ -1,7 +1,19 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import Context from '../context/contractContext';
+import { useContext } from 'react';
 
 export default function Navbar() {
+  const context = useContext(Context);
+  
+  function LoginBtn(){
+    return (
+      <div >
+        <button className={`ms-5 btn btn-primary py-2`} onClick={context.connectWallet}>Connect Wallet</button>
+      </div>
+    )
+  }
+
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -18,6 +30,7 @@ export default function Navbar() {
               <Link className="nav-link" to="/viewOnRentRecord">View OnRent Records</Link>
               <Link className="nav-link" to="/viewBorrowedRecord">View Borrowed Records</Link>
               <Link className="nav-link" to="/marketplace">Marketplace</Link>
+              {!(context.account?.address) && (LoginBtn())}
             </div>
           </div>
         </div>

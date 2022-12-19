@@ -6,4 +6,8 @@ function convertToTimestamp(time){
     // console.log(Math.floor(Date.now() / 1000))
 }
 
-export default convertToTimestamp;
+function convertToDate(timestamp){
+    var date = Date(timestamp * 1000);
+    return date;
+}
+export {convertToTimestamp, convertToDate};

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import Context from "../context/contractContext";
 import axios from "axios";
 import { useForm } from "react-hook-form";
@@ -49,6 +49,7 @@ export default function CreateNft() {
         // console.log("File successfully sent to IPFS", ImgHash);
       }
     } catch (error) {
+      alert("Error sending File to IPFS: ");
       console.log("Error sending File to IPFS: ");
       console.log(error);
     }
@@ -76,15 +77,16 @@ export default function CreateNft() {
         });
 
         if (resFile) {
-          const ImgHash = `https://ipfs.io/ipfs/${resFile.data.IpfsHash}`;
           setMetaDataHash(resFile.data.IpfsHash);
           return resFile.data.IpfsHash;
         }
       } else {
+        alert("Error. null file hash ");
         console.log("Error. null file hash");
       }
     } catch (error) {
-      console.log("Error sending File to IPFS: ");
+      alert("Error sending json to IPFS: ");
+      console.log("Error sending json to IPFS: ");
       console.log(error);
     }
   };
@@ -92,10 +94,8 @@ export default function CreateNft() {
   async function uploadDataToIPFS() {
     const responseFuncOne = await sendFileToIPFS(File, File.name);
     if (responseFuncOne) {
-      // console.log("response1",responseFuncOne);
       setFileHash(responseFuncOne);
       const responseFuncTwo = await sendMetaDataToIPFS(responseFuncOne);
-      // console.log("response2",responseFuncTwo)
       if (responseFuncTwo) {
         setMetaDataHash(responseFuncTwo);
         return responseFuncTwo;
@@ -134,13 +134,16 @@ export default function CreateNft() {
             }, 3000);
           });
         } else {
+          alert("Error while uploading the files");
           console.log("Error while uploading the files");
         }
       } else {
+        alert("Cant mint Nft. invalid copy or null file");
         console.log("Cant mint Nft. invalid copy or null file");
         console.log(copies, File);
       }
     } catch (error) {
+      alert('Exception thrown while calling mint nft function');
       console.log(error);
     }
   };

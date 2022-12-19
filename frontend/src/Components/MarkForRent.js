@@ -1,12 +1,32 @@
-import React, { useState, useEffect, useContext } from "react";
+import axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
 import Context from "../context/contractContext";
-import convertTime from "../utility/convertTime";
+import {convertToTimestamp, } from "../utility/convertTime";
 import { useForm } from "react-hook-form";
 
 export default function MarkForRent() {
   const context = useContext(Context);
   const contractFunction = context.contractFunction;
-  // let errors = [];
+  const [Records, setRecords] = useState(null)
+
+  let refresh = async () => {
+    if (context.contract) {
+      console.log("Updating minted token list........")
+      contractFunction.getMintedTokensRecord().then((result) => {
+        setRecords(result);
+        console.log("Updated minted token list")
+      }).catch((err) => {
+        console.log(err);
+      });
+    }
+  }
+
+  useEffect(() => {
+    let temp = async () => {
+      await refresh();
+    }
+    temp();
+  }, [context.account])
 
   const {
     register,
@@ -25,29 +45,62 @@ export default function MarkForRent() {
     try {
       if (parseInt(tknId) < 0) {
         alert("Invalid");
-      } else if (convertTime(start) + 60 <= currentTime) {
-        // console.log(convertTime(start), currentTime);
+      } else if (convertToTimestamp(start) + 60 <= currentTime) {
+        // console.log(convertToTimestamp(start), currentTime);
         alert("start time should be greater than current time");
-      } else if (convertTime(end) <= currentTime) {
+      } else if (convertToTimestamp(end) <= currentTime) {
         alert("end time should be greater than current time");
       } else if (parseInt(copies) <= 0) {
         alert("copies should be greater than zero");
-      } else if (parseFloat(price) <= 0 || parseFloat(price) == 0) {
+      } else if (parseFloat(price) <= 0 || parseFloat(price) === 0.0) {
         alert("price should be greater than zero");
       } else {
         contractFunction.markForRent(
           tknId,
           copies,
           price,
-          convertTime(start),
-          convertTime(end)
+          convertToTimestamp(start),
+          convertToTimestamp(end)
         );
+
       }
     } catch (error) {
       alert("Error while parsing the inputs");
       console.log(error);
     }
   };
+
+  function Card(props) {
+    const [Uri, setUri] = useState(null);
+
+    let extractUri = async (uri) => {
+      let res = await axios.get(`https://ipfs.io/ipfs/${uri}`);
+      if (res) {
+        setUri(res.data.data);
+      }
+    }
+
+    function isOdd(val) {
+      return val % 3;
+    }
+
+    return (
+      <>
+
+        <div className="col-md-3 rounded shadow py-2 border border-primary">
+          <div>TokenId: {props.tknId}</div>
+          <div>Copies: {props.copies}</div>
+          <div>Frozen: {props.frozen}</div>
+          {extractUri(props.uri) &&
+            <div><img src={`https://ipfs.io/ipfs/${Uri}`} alt="Image" height={'200px'} width={'250px'} /></div>
+          }
+        </div>
+
+        {!(isOdd((props.index) + 1)) && (<div className="w-100"></div>)}
+
+      </>
+    )
+  }
 
   return (
     <>
@@ -141,6 +194,17 @@ export default function MarkForRent() {
         </div>
       </div>
 
+      <hr />
+
+      <h1 style={{ textAlign: 'center' }}>Tokens Owned</h1>
+
+      <div className="container">
+        <div className="row justify-content-evenly">
+          {Records && Records.map((obj, i) => {
+            return <Card key={i} index={i} frozen={obj.frozen} tknId={obj.token_id} copies={obj.copies} uri={obj.uri} />
+          })}
+        </div>
+      </div>
       <hr />
     </>
   );
